@@ -46,6 +46,7 @@ public class AuthServiceImpl implements AuthService {
         String refresh = jwtProvider.generateRefreshToken(user.getEmail());
 
         refreshTokenRepository.deleteByEmail(user.getEmail());
+
         refreshTokenRepository.save(RefreshToken.builder()
                 .email(user.getEmail())
                 .token(refresh)
@@ -86,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void register(RegisterRequest request) {
+    public RegisterResponse register(RegisterRequest request) {
         if (credentialRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new AlreadyExistsException("User already exists");
         }
@@ -101,6 +102,19 @@ public class AuthServiceImpl implements AuthService {
                 .role(request.getRole())
                 .build();
 
-        credentialRepository.save(credential);
+        Credential saved = credentialRepository.save(credential);
+        return new RegisterResponse(saved.getId(), "User registered successfully");
     }
+
+    @Override
+    @Transactional
+    public void deleteCredential(Long id) {
+        Credential credential = credentialRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Credential with id " + id + " not found"));
+
+        refreshTokenRepository.deleteByEmail(credential.getEmail());
+        credentialRepository.delete(credential);
+    }
+
+
 }

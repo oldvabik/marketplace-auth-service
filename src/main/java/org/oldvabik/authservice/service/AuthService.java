@@ -9,5 +9,7 @@ public interface AuthService {
 
     AuthResponse refresh(RefreshTokenRequest request);
 
-    void register(RegisterRequest request);
+    RegisterResponse register(RegisterRequest request);
+
+    void deleteCredential(Long id);
 }
