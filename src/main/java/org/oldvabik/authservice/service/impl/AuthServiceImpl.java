@@ -74,6 +74,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         if (!jwtProvider.validateRawToken(request.getRefreshToken())) {
+            refreshTokenRepository.deleteByEmail(email);
             throw new TokenValidationException("Expired or invalid refresh token");
         }
 
